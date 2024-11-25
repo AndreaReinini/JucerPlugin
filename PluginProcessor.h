@@ -14,7 +14,6 @@ enum class ProcessingMode
     InputAndGenerated
 };
 
-//GUI- Sostituzione juce::AudioProcessor -> foleys::MagicProcessor
 class AdditiveSynthWithWaveshapingAudioProcessor : public foleys::MagicProcessor
 {
 public:
@@ -26,10 +25,6 @@ public:
     void releaseResources() override;
 
     void processBlock(juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
-
-    //GUI-Rimozione non utilizzati
-    //juce::AudioProcessorEditor* createEditor() override;
-    //bool hasEditor() const override { return true; }
 
     const juce::String getName() const override { return "AdditiveSynthWithWaveshaping"; }
 
@@ -44,45 +39,25 @@ public:
     const juce::String getProgramName(int index) override { return {}; }
     void changeProgramName(int index, const juce::String& newName) override {}
 
-    //GUI- Rimozione non utilizzati
-    //void getStateInformation(juce::MemoryBlock& destData) override {}
-    //void setStateInformation(const void* data, int sizeInBytes) override {}
-
-    // Parametri di controllo dell'oscillatore e del waveshaping
     float frequency = 220.0f;
     int numHarmonics = 5;
-    // Parametri di intensità del waveshaping e gain di uscita
     float waveshapingIntensity = 1.0f;
-    
-    float drive = 1.0f;       // Controlla l’intensità dell’ingresso nel waveshaper
-    float symmetry = 0.0f;    // Controlla la simmetria della distorsione
-    float amount = 1.0f;      // Controlla l’intensità complessiva del waveshaping
 
-    void setDrive(float newDrive) { drive = newDrive; }
-    void setSymmetry(float newSymmetry) { symmetry = newSymmetry; }
-    void setAmount(float newAmount) { amount = newAmount; }
+    float drive = 1.0f;
+    float symmetry = 0.0f;
+    float amount = 1.0f;
 
-    void onAmplitudeSliderChange(int harmonicIndex, float newAmplitude)
-    {
-        oscillator.setHarmonicAmplitude(harmonicIndex, newAmplitude);
-    }
-
-    void onPhaseSliderChange(int harmonicIndex, float newPhase)
-    {
-        oscillator.setHarmonicPhase(harmonicIndex, newPhase);
-    }
-    
-    //float outputGain = 0.5f;  // Gain per normalizzare l'output
     AdditiveOscillator oscillator;
     Waveshaper waveshaper;
     Equalizer equalizer;
     SpectrumAnalyzer spectrumAnalyzer;
-    std::atomic<float> outputGain { 1.0f };  // Parametro per il gain di output
-    
-    
-    bool dontCallProcess=true;
+
+    std::atomic<float> outputGain{ 1.0f };
+    bool dontCallProcess = true;
+
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AdditiveSynthWithWaveshapingAudioProcessor);
+    juce::AudioProcessorValueTreeState apvts;
+    juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AdditiveSynthWithWaveshapingAudioProcessor);
 };
-
-
